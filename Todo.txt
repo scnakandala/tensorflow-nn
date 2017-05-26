@@ -7,3 +7,10 @@
 7. Getting the computation graph for HH_neurons_4 -> Supun
 8. CPP code benchmark -> Giri
 9. Remembering the input value indices instead of connection map multiplication
+
+
+
+Grand Goals
+===========
+1. Creating a gateway (JupyterHub version of this).
+2. Optimize the performance and compare it against existing tools.

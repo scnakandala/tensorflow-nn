@@ -6,3 +6,4 @@
 6. Do a benchmark for the running times for different number of neurons -> Supun (100,000 iterations with million neurons)
 7. Getting the computation graph for HH_neurons_4 -> Supun
 8. CPP code benchmark -> Giri
+9. Remembering the input value indices instead of connection map multiplication

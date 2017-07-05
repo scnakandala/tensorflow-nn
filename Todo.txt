@@ -8,6 +8,8 @@
 8. CPP code benchmark -> Giri
 9. Remembering the input value indices instead of connection map multiplication
 
+10. Find what is the exact reason why TensorFlow is failing with large number of neurons.
+
 
 
 Grand Goals

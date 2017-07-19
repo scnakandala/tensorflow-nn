@@ -1,0 +1,36 @@
+E I network of leak itegrating fire neural network
+
+1. Two groups of neurons E(100) and I(25)
+
+2. Connectivity is as follows.
+    -> E neurons are connected to themselves with a probablity 10%
+    -> E neruons are connected to I neurons with a probability of 10%
+    -> I neurons are connected to E neurons with 15%
+    
+3. Different synapse types
+    -> E to E synapse types are going to be type Ampa
+    -> E to I synapse types are going to be type Ampa
+    -> I to E synapse types are going to be type Gaba
+    
+4. The equation for E and I are as follows
+    v' = dv/dt = gl*(ve-v) + dc
+    
+5. firing_threshold = -50, firing_reset = -65, gl~N(2*10^-3, (10^-4)^2), dc~N(0.1, (0.1)^2), ve~N(-65, 2^2)
+
+6. E to E Ampa connection weights ~ N(0.1, 0.05^2)
+
+7. I to E Gaba connection weights ~ N(0.1, 0.05^2)
+
+8. Ampa synapse calculation Is = gs * w * (vs - v)
+    gs = exp((ts-t)/tau)
+    tau = 100
+    ts = firing time step
+    w -> weights
+    vs = 0
+    
+9. Gabba synapse calculation Is = gs * w * (vs - v)
+    gs = exp((ts-t)/tau)
+    tau = 100
+    ts = firing time step
+    w -> weights
+    vs = -90

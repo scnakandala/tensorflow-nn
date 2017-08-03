@@ -96,7 +96,7 @@ class TFBNN(object):
 
             # peak thresholding for neuron outputs
             rk_next[i][0] = tf.where(tf.greater(rk_next[i][0], self.firing_threshold),
-                                     self.firing_reset*tf.ones_like(rk_next[i][0]), rk_next[i][0])
+                                     tf.multiply(self.firing_reset,tf.ones_like(rk_next[i][0])), rk_next[i][0])
         
         return [rk_next, tf.add(state[1], 1.), fired_new, fired_iteration_new]
             

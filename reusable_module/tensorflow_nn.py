@@ -33,10 +33,10 @@ class TFBNN(object):
         self.output = tf.scan(self.__neuron_combined_steps, self.inputs, initializer=[self.initial_state.rk_variables,
             self.initial_state.iteration, self.initial_state.fired, self.initial_state.fired_iteration, self.ampa_random_list])
         
-    def run_simulation(self, temp):
+    def run_simulation(self):
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
-            return sess.run([temp, self.output])
+            return sess.run(self.output)
     
     def __neuron_combined_steps(self, state, step_input):
 

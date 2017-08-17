@@ -12,7 +12,7 @@ class BNNState(object):
 class TFBNN(object):
     
     def __init__(self, num_neurons, iterations, h, firing_threshold, firing_reset,
-                 current_func, initial_state, inputs, connections, connection_weights):
+                 current_func, initial_state, inputs, connections, connection_weights, ampa_random_list):
         self.num_neurons = num_neurons
         self.iterations = iterations
         
@@ -28,22 +28,22 @@ class TFBNN(object):
 
         self.connection_weights = connection_weights
         
-        self.output = tf.scan(self.__neuron_combined_steps, self.inputs, initializer=[self.initial_state.rk_variables,
-            self.initial_state.iteration, self.initial_state.fired, self.initial_state.fired_iteration])
+        self.ampa_random_list = ampa_random_list
         
-    def run_simulation(self):
+        self.output = tf.scan(self.__neuron_combined_steps, self.inputs, initializer=[self.initial_state.rk_variables,
+            self.initial_state.iteration, self.initial_state.fired, self.initial_state.fired_iteration, self.ampa_random_list])
+        
+    def run_simulation(self, temp):
         with tf.Session() as sess:
             sess.run(tf.global_variables_initializer())
-            iteration_vals = sess.run(self.output)
-      
-            return iteration_vals
+            return sess.run([temp, self.output])
     
     def __neuron_combined_steps(self, state, step_input):
 
-        [rk_variables, iteration, fired, fired_iteration] = state
+        [rk_variables, iteration, fired, fired_iteration, ampa_random_list] = state
         
         with tf.name_scope('RK1'):
-            rk1 = self.__call_currents(rk_variables, iteration, fired, fired_iteration, step_input)
+            rk1, ampa_random_list = self.__call_currents(rk_variables, iteration, fired, fired_iteration, ampa_random_list, step_input)
             
         with tf.name_scope('RK2'):
             rk2_in = []
@@ -53,7 +53,7 @@ class TFBNN(object):
                     temp.append(tf.add(tf.multiply(tf.divide(self.h, tf.constant(2.)), rk1[i][j]), rk_variables[i][j]))
                 rk2_in.append(temp)
             iteration_rk2 = tf.add(iteration, tf.divide(self.h, tf.constant(2.)))
-            rk2 = self.__call_currents(rk2_in, iteration_rk2, fired, fired_iteration, step_input)
+            rk2, ampa_random_list = self.__call_currents(rk2_in, iteration_rk2, fired, fired_iteration, ampa_random_list, step_input)
 
         with tf.name_scope('RK3'):
             rk3_in = []
@@ -63,7 +63,7 @@ class TFBNN(object):
                     temp.append(tf.add(tf.multiply(tf.divide(self.h, tf.constant(2.)), rk2[i][j]), rk_variables[i][j]))
                 rk3_in.append(temp)
             iteration_rk3 = tf.add(iteration, tf.divide(self.h, tf.constant(2.)))
-            rk3 = self.__call_currents(rk3_in, iteration_rk3, fired, fired_iteration, step_input)
+            rk3, ampa_random_list = self.__call_currents(rk3_in, iteration_rk3, fired, fired_iteration, ampa_random_list, step_input)
             
         with tf.name_scope('RK4'):
             rk4_in = []
@@ -73,7 +73,7 @@ class TFBNN(object):
                     temp.append(tf.add(tf.multiply(self.h, rk3[i][j]), rk_variables[i][j]))
                 rk4_in.append(temp)                
             iteration_rk4 = tf.add(iteration, self.h)
-            rk4 = self.__call_currents(rk4_in, iteration_rk4, fired, fired_iteration, step_input)
+            rk4, ampa_random_list = self.__call_currents(rk4_in, iteration_rk4, fired, fired_iteration, ampa_random_list, step_input)
         
         rk_next = []
         for i in range(len(rk4)):
@@ -98,9 +98,9 @@ class TFBNN(object):
             rk_next[i][0] = tf.where(tf.greater(rk_next[i][0], self.firing_threshold),
                                      tf.multiply(self.firing_reset,tf.ones_like(rk_next[i][0])), rk_next[i][0])
         
-        return [rk_next, tf.add(state[1], 1.), fired_new, fired_iteration_new]
+        return [rk_next, tf.add(state[1], 1.), fired_new, fired_iteration_new, ampa_random_list]
             
         
-    def __call_currents(self, rk_variables, iteration, fired, fired_iteration, step_input):
-        return self.current_func(rk_variables, iteration, fired, fired_iteration, step_input,
+    def __call_currents(self, rk_variables, iteration, fired, fired_iteration, ampa_random_list, step_input):
+        return self.current_func(rk_variables, iteration, fired, fired_iteration, ampa_random_list,  step_input,
                                   self.connections, self.connection_weights)
